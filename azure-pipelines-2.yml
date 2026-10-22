@@ -3,20 +3,47 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
+
 trigger:
 - master
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.21'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'clean test'
+resources:
+  containers:
+  - container: mysql
+    image: mysql:8.0
+    env:
+      MYSQL_ROOT_PASSWORD: RootPass123
+      MYSQL_DATABASE: appdb
+    ports:
+    - 3306:3306
+    options: >-
+      --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pRootPass123"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=12
+
+jobs:
+- job: Build
+  services:
+    mysql: mysql
+
+  steps:
+  - task: Maven@4
+    displayName: Build and test Hostel Management System
+    inputs:
+      mavenPomFile: 'pom.xml'
+      mavenOptions: '-Xmx3072m'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: '1.21'
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      goals: 'clean package'
+    env:
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/appdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: RootPass123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
