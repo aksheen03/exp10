@@ -19,11 +19,6 @@ resources:
       MYSQL_DATABASE: appdb
     ports:
     - 3306:3306
-    options: >-
-      --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pRootPass123"
-      --health-interval=10s
-      --health-timeout=5s
-      --health-retries=12
 
 jobs:
 - job: Build
