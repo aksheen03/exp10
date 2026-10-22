@@ -4,6 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 
+
 trigger:
 - master
 
@@ -15,7 +16,7 @@ resources:
   - container: mysql
     image: mysql:8.0
     env:
-      MYSQL_ROOT_PASSWORD: RootPass123
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_DATABASE: appdb
     ports:
     - 3306:3306
@@ -27,7 +28,6 @@ jobs:
 
   steps:
   - task: Maven@4
-    displayName: Build and test Hostel Management System
     inputs:
       mavenPomFile: 'pom.xml'
       mavenOptions: '-Xmx3072m'
@@ -40,5 +40,5 @@ jobs:
     env:
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/appdb
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: RootPass123
+      SPRING_DATASOURCE_PASSWORD: ''
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
